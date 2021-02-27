@@ -5,11 +5,40 @@ import sys
 import calendar
 import subprocess
 from datetime import date
+import platform
 
-diaryPath = os.environ.get('DIARY')
-editorPath = os.environ.get('SUBL')
+diaryPath = os.environ.get('DAILY_NOTES_PATH')
+editorPath = os.environ.get('DAILY_NOTES_EDITOR')
 shellPath = os.environ.get('SHELL')
 path = name = ""
+
+if diaryPath == None or os.path.exists(diaryPath) == False:
+	if os.path.exists(diaryPath) == False:
+		print('Diary path is not exist. Path will be set on default (Desktop)\n')
+
+	if 'linux' in sys.platform:
+		# If on wsl
+		if 'Microsoft' in platform.uname()[3]:
+			command = 'cmd.exe /c "echo %USERNAME%"'
+			winUsername = subprocess.check_output(command, shell=True)
+			winUsername = winUsername.strip()
+			diaryPath = '/mnt/c/Users/' + winUsername + '/Desktop/'
+			print(diaryPath)
+		else:
+			diaryPath = '~/Desktop/'
+	# elif 'win' in sys.platform:
+	# 	diaryPath = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
+	else:
+		print('Unsupportable platform')
+
+if editorPath == None:
+	if os.environ.get('VISUAL') != None:
+		editorPath = os.environ.get('VISUAL')
+	elif os.environ.get('EDITOR') != None:
+		editorPath = os.environ.get('EDITOR')
+	else:
+		print('Cannot detect editor')
+
 
 def getDateStr(date):
 	s = str(date)
